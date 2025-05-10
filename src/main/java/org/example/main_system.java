@@ -1,8 +1,13 @@
 package org.example;
 
+import java.util.Arrays;
 import java.util.Random;
+import java.util.Map;
+import java.util.HashMap;
 
 public class main_system {
+
+
     public enum Meals {
         CHICKEN_BIRYANI(new String[]{"Chicken", "Rice", "Spices", "Yogurt"}),
         PASTA_WITH_VEGETABLES(new String[]{"Pasta", "Tomatoes", "Bell Peppers", "Onions"}),
@@ -114,4 +119,150 @@ public class main_system {
             return substitutes;
         }
     }
+    public static class InventoryManager {
+        private Map<String, Integer> ingredientStock = new HashMap<>();
+        private Map<String, Double> ingredientPrices = new HashMap<>();
+        private Map<String, Double> usualPrices = new HashMap<>();
+
+       
+        public void updateStock(String ingredient, int quantity) {
+            ingredientStock.put(ingredient, quantity);
+        }
+
+        
+        public int checkStockLevel(String ingredient) {
+            return ingredientStock.getOrDefault(ingredient, 0);
+        }
+
+        
+        public boolean generatePurchaseOrder(String ingredient) {
+            int currentStock = checkStockLevel(ingredient);
+            if (currentStock <= 10) {
+                System.out.println("Generating purchase order for " + ingredient);
+                return true;
+            }
+            return false;
+        }
+        
+        public String selectPreferredSupplier(String ingredient) {
+            return "Supplier XYZ";
+        }
+        
+        public String getUsageHistory(String ingredient) {
+            return "Usage history for " + ingredient +": Used 10 units last month";
+        }
+
+        public double fetchLatestPrice(String ingredient) {
+            return ingredientPrices.getOrDefault(ingredient, 5.0);
+        }
+
+        public void retrieveRealTimePrices() {
+            ingredientPrices.clear();
+            usualPrices.clear();
+
+            // تحديث الأسعار الحالية
+            ingredientPrices.put("Pasta", 5.0);
+            ingredientPrices.put("Tomato", 3.0);
+            ingredientPrices.put("Olive Oil", 7.0);
+            ingredientPrices.put("Basil", 2.0);
+            ingredientPrices.put("Garlic", 1.5);
+
+            // تحديث الأسعار المعتادة
+            usualPrices.put("Pasta", 4.0);
+            usualPrices.put("Tomato", 2.5);
+            usualPrices.put("Olive Oil", 6.0);
+            usualPrices.put("Basil", 1.8);
+            usualPrices.put("Garlic", 1.2);
+
+            // التحقق من زيادة الأسعار
+            for (String ingredient : ingredientPrices.keySet()) {
+                double currentPrice = ingredientPrices.get(ingredient);
+                double usualPrice = usualPrices.get(ingredient);
+                if (currentPrice > usualPrice) {
+                    // التنبيه بزيادة السعر
+                    System.out.println("Price increase detected for " + ingredient + ": " + usualPrice + " -> " + currentPrice);
+                }
+            }
+
+            System.out.println("Retrieved real-time prices from suppliers");
+        }
+
+        public Map<String, Double> getIngredientPrices() {
+            return ingredientPrices;
+        }
+
+        public void setIngredientPrices(Map<String, Double> ingredientPrices) {
+            this.ingredientPrices = ingredientPrices;
+        }
+        public double calculateTotalCost(String[] ingredients) {
+            double total = 0.0;
+            for (String ingredient : ingredients) {
+                total += fetchLatestPrice(ingredient);
+            }
+            return total;
+        }
+        public boolean detectPriceIncrease(String ingredient, int percentageThreshold) {
+            double usualPrice = usualPrices.getOrDefault(ingredient, 5.0);
+            double latestPrice = fetchLatestPrice(ingredient);
+            double increasePercentage = ((latestPrice - usualPrice) / usualPrice) * 100;
+            System.out.println("Usual price for " + ingredient + ": " + usualPrice);
+            System.out.println("Latest price for " + ingredient + ": " + latestPrice);
+            System.out.println("Increase percentage: " + increasePercentage + "%");
+            return increasePercentage > percentageThreshold;
+        }
+        public Double getUsualPrice(String ingredient) {
+            return usualPrices.get(ingredient);
+        }
+
+
+
+
+    }
+
+    public String generateCustomerInvoice(String item, double price) {
+        InventoryManager inventory = new InventoryManager();
+        int stockLevel = inventory.checkStockLevel(item);
+        if (stockLevel <= 0) {
+            return "Error: Item " + item + " is out of stock.";
+        }
+        StringBuilder ingredientsList = new StringBuilder();
+        try {
+            Meals meal = Meals.valueOf(item.toUpperCase().replace(" ", "_"));
+            String[] ingredients = meal.get_ingredient();
+            ingredientsList.append("Ingredients: ").append(Arrays.toString(ingredients));
+        } catch (IllegalArgumentException e) {
+            ingredientsList.append("Ingredients: Not specified");
+        }
+        return "Invoice: " + item + " - " + price + " (" + ingredientsList.toString() + ")";
+    }
+
+    public String generateFinancialReport(add_prefreances_customer customer) {
+        InventoryManager inventory = new InventoryManager();
+        inventory.retrieveRealTimePrices();
+        Map<String, Double> prices = inventory.getIngredientPrices();
+        double totalRevenue = 0.0;
+        String[] orders = customer.getPast_orders();
+        if (orders == null) {
+            return "Total Revenue: 0.0";
+        }
+        for (String order : orders) {
+
+            int stockLevel = inventory.checkStockLevel(order);
+            if (stockLevel <= 0) {
+                continue;
+            }
+            try {
+                Meals meal = Meals.valueOf(order.toUpperCase().replace(" ", "_"));
+                for (String ingredient : meal.get_ingredient()) {
+                    totalRevenue += prices.getOrDefault(ingredient, 5.0);
+                }
+            } catch (IllegalArgumentException e) {
+                totalRevenue += prices.getOrDefault(order, 5.0);
+            }
+        }
+        return "Total Revenue: " + totalRevenue;
+    }
+
+
+
 }
