@@ -59,12 +59,31 @@ public class add_prefreances_customer {
         this.prefreances.add(pref);
     }
 
+    public void in_order(String[] strings) {
+        if (strings == null || strings.length == 0) {
+            System.out.println("Error: No orders provided.");
+            return;
+        }
+
+        if (past_orders == null) {
+            past_orders = new String[strings.length];
+            System.arraycopy(strings, 0, past_orders, 0, strings.length);
+        } else {
+            String[] updatedOrders = new String[past_orders.length + strings.length];
+            System.arraycopy(past_orders, 0, updatedOrders, 0, past_orders.length);
+            System.arraycopy(strings, 0, updatedOrders, past_orders.length, strings.length);
+            past_orders = updatedOrders;
+        }
+
+        System.out.println("Order(s) recorded: " + Arrays.toString(past_orders));
+    }
+
     class prefnames extends main_system {
         add_prefreances_customer x = new add_prefreances_customer();
         Scanner input1 = new Scanner(System.in);
         String input = input1.nextLine().toUpperCase();
-        String[] meal = {"chekin biriani"};
-        String[] meal2 = {"PASTA WITH VEGETABLES"};
+        String[] meal = {"CHICKEN_BIRYANI"};
+        String[] meal2 = {"PASTA_WITH_VEGETABLES"};
 
         prefnames(String[] name, String[] name2) {
 
@@ -97,8 +116,7 @@ public class add_prefreances_customer {
 
         }
 
-        void in_order(String[] order) {
-
+        void recordPreferenceOrder(String[] order) {
             setPast_orders(order);
             x.addPrefreance(x);
         }
@@ -212,7 +230,10 @@ public class add_prefreances_customer {
         public void modifyMealIngredients(String[] unwantedPrefs) {
             // Assuming getPast_orders() returns an array of meal names (e.g., ["CHICKEN_CURRY", "PASTA_ARRABBIATA"])
             String[] orderNames = getPast_orders();
-
+            if (orderNames == null) {
+                System.out.println("No orders to modify.");
+                return;
+            }
             for (String orderName : orderNames) {
                 // Iterate over the Meals enum
                 for (Meals meal : Meals.values()) {
@@ -298,6 +319,19 @@ public class add_prefreances_customer {
             }
 
 
+        }
+    }
+    public static class CustomerPreferences {
+        private Map<String, String> customerPreferences = new HashMap<>();
+
+
+        public void setPreference(String ingredient, String preference) {
+            customerPreferences.put(ingredient, preference);
+        }
+
+
+        public String getPreference(String ingredient) {
+            return customerPreferences.getOrDefault(ingredient, "None");
         }
     }
 }
