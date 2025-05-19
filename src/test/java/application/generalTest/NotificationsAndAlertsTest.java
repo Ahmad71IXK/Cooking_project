@@ -69,4 +69,51 @@ public class NotificationsAndAlertsTest {
         Assert.assertFalse("No notifications received.", notifications.isEmpty());
         Assert.assertTrue("Low Stock Alert notification not found.", notifications.get(0).getMessage().contains("Low Stock Alert"));
     }
+    @Given("a customer who has placed a new order")
+    public void a_customer_who_has_placed_a_new_order() {
+        customer = new User("John Doe", "Customer");
+    }
+
+    @When("a new order is placed with details {string}")
+    public void a_new_order_is_placed_with_details(String orderDetails) {
+        notifications = NotificationsAndAlerts.sendOrderNotification(customer, orderDetails);
+    }
+
+    @Then("the customer should receive a new order notification")
+    public void the_customer_should_receive_a_new_order_notification() {
+        Assert.assertFalse("No notifications received.", notifications.isEmpty());
+        Assert.assertTrue("New Order notification not found.", notifications.get(0).getMessage().contains("New Order Placed"));
+    }
+
+    @Given("a customer who has modified an order")
+    public void a_customer_who_has_modified_an_order() {
+        customer = new User("John Doe", "Customer");
+    }
+
+    @When("the order is modified with details {string}")
+    public void the_order_is_modified_with_details(String modifiedOrderDetails) {
+        notifications = NotificationsAndAlerts.sendOrderModificationNotification(customer, modifiedOrderDetails);
+    }
+
+    @Then("the customer should receive an order modification notification")
+    public void the_customer_should_receive_an_order_modification_notification() {
+        Assert.assertFalse("No notifications received.", notifications.isEmpty());
+        Assert.assertTrue("Order Modification notification not found.", notifications.get(0).getMessage().contains("Order Modified"));
+    }
+
+    @Given("a customer who has changed their preferences")
+    public void a_customer_who_has_changed_their_preferences() {
+        customer = new User("John Doe", "Customer");
+    }
+
+    @When("the preferences are updated with details {string}")
+    public void the_preferences_are_updated_with_details(String preferenceDetails) {
+        notifications = NotificationsAndAlerts.sendPreferenceChangeNotification(customer, preferenceDetails);
+    }
+
+    @Then("the customer should receive a preference change notification")
+    public void the_customer_should_receive_a_preference_change_notification() {
+        Assert.assertFalse("No notifications received.", notifications.isEmpty());
+        Assert.assertTrue("Preference Change notification not found.", notifications.get(0).getMessage().contains("Preference Updated"));
+    }
 }

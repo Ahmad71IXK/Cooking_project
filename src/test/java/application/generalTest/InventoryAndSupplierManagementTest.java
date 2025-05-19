@@ -6,6 +6,8 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.example.main_system;
+import org.example.InventoryManager;
+import  org.example.Supplier;
 
 import static org.junit.Assert.*;
 
@@ -15,7 +17,8 @@ import static org.junit.Assert.*;
  * fetching supplier prices, and notifying managers.
  */
 public class InventoryAndSupplierManagementTest {
-    private main_system.InventoryManager inventoryManager = new main_system.InventoryManager();
+//    private main_system.InventoryManager inventoryManager = new main_system.InventoryManager();
+    private InventoryManager inventoryManager = new InventoryManager();
     private double latestPrice; // Stores the latest fetched price
     private double totalCost; // Stores the total cost of a purchase order
     private boolean priceIncreaseDetected; // Tracks if a price increase is detected
@@ -51,16 +54,16 @@ public class InventoryAndSupplierManagementTest {
     @Then("the system should suggest restocking {string}")
     public void the_system_should_suggest_restocking(String ingredient) {
         // Check if a purchase order is generated, indicating restocking is suggested
-        boolean orderGenerated = inventoryManager.generatePurchaseOrder(ingredient);
-        assertTrue("System should suggest restocking for " + ingredient, orderGenerated);
+        boolean suggestionNeeded = inventoryManager.shouldSuggestRestocking(ingredient);
+        assertTrue("System should suggest restocking for " + ingredient, suggestionNeeded);
         System.out.println("Suggested restocking for " + ingredient);
     }
 
     @Then("the system should generate a purchase order for {string}")
     public void theSystemShouldGenerateAPurchaseOrderFor(String ingredient) {
         // Verify that a purchase order is generated for the ingredient
-        boolean orderGenerated = inventoryManager.generatePurchaseOrder(ingredient);
-        assertTrue("Purchase order should be generated for " + ingredient, orderGenerated);
+        boolean orderShouldBeGenerated = inventoryManager.shouldCreateActualPurchaseOrder(ingredient);
+        assertTrue("Purchase order should be generated for " + ingredient, orderShouldBeGenerated);
         System.out.println("Generated purchase order for " + ingredient);
     }
 
@@ -81,6 +84,7 @@ public class InventoryAndSupplierManagementTest {
     public void theKitchenManagerIsPreparingAPurchaseOrderFor(String ingredient) {
         // Simulate a low stock level to trigger a purchase order
         inventoryManager.updateStock(ingredient, 10);
+        inventoryManager.retrieveRealTimePrices();
     }
 
     @When("the system fetches the latest price from the supplier")
@@ -91,7 +95,7 @@ public class InventoryAndSupplierManagementTest {
 
         assertTrue("The latest price for Pasta should be valid", latestPrice > 0);
 
-        // تحقق من وجود زيادة في السعر
+
         double usualPrice = inventoryManager.getUsualPrice("Pasta");
         if (latestPrice > usualPrice) {
             System.out.println("Price increase detected for Pasta: " + usualPrice + " -> " + latestPrice);
@@ -171,7 +175,8 @@ public class InventoryAndSupplierManagementTest {
 
     @Then("the system should alert the kitchen manager of the price increase")
     public void theSystemShouldAlertTheKitchenManagerOfThePriceIncrease() {
-//        assertTrue("Price increase should be detected", priceIncreaseDetected);
+        assertTrue("Price increase should be detected", priceIncreaseDetected);
         System.out.println("Alerted kitchen manager of price increase");
     }
+
 }

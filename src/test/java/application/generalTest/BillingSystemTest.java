@@ -5,36 +5,32 @@ import io.cucumber.java.en.When;
 import io.cucumber.java.en.Then;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import org.example.main_system;
-import org.example.add_prefreances_customer;
+import org.example.BillingSystem;
+
 
 public class BillingSystemTest {
 
+    private BillingSystem billingSystem;
     private String item;
     private double price;
     private String invoice;
     private String financialReport;
-    private final main_system system;
-    private final add_prefreances_customer customer;
 
     public BillingSystemTest() {
-        system = new main_system();
-        customer = new add_prefreances_customer();
+        billingSystem = new BillingSystem();
     }
 
     @Given("a customer has placed an order for {string} costing {double}")
     public void customerPlacedOrder(String itemName, double itemPrice) {
         item = itemName;
         price = itemPrice;
-        customer.setNeworders(new String[]{itemName});
-        customer.in_order(new String[]{itemName});
+        invoice = billingSystem.generateCustomerInvoice(item, price);
         System.out.println("Order placed for " + item + " with price " + price);
     }
 
     @When("the order is confirmed")
     public void orderConfirmed() {
-        invoice = system.generateCustomerInvoice(item, price);
-        System.out.println("Invoice generated: " + invoice);
+        System.out.println("Order confirmed. Invoice generated: \n" + invoice);
     }
 
     @Then("the system should generate an invoice for the customer")
@@ -44,20 +40,23 @@ public class BillingSystemTest {
 
     @Then("the invoice should include the item {string} with the price {double}")
     public void invoiceContainsItem(String expectedItem, double expectedPrice) {
-        assertEquals("Invoice should contain correct item", expectedItem, item);
-        assertEquals("Invoice should contain correct price", expectedPrice, price, 0.01);
+        String expectedInvoice = "Invoice:\nItem: " + expectedItem + "\nPrice: " + expectedPrice + " ₪\n";
+        assertEquals("Invoice content should match expected format", expectedInvoice, invoice);
     }
 
     @Given("the system has recorded sales transactions")
     public void systemRecordedTransactions() {
-        customer.setPast_orders(new String[]{"Chicken", "Pasta"});
-        System.out.println("System has recorded sales transactions.");
+        // Simulate previous orders
+        billingSystem.generateCustomerInvoice("Chicken", 25.0);
+        billingSystem.generateCustomerInvoice("Pasta", 15.0);
+        billingSystem.generateCustomerInvoice("Salad", 10.0);
+        System.out.println("Sales transactions recorded.");
     }
 
     @When("the administrator requests a financial report")
     public void adminRequestsFinancialReport() {
-        financialReport = system.generateFinancialReport(customer);
-        System.out.println("Financial report generated: " + financialReport);
+        financialReport = billingSystem.generateFinancialReport();
+        System.out.println("Financial report generated: \n" + financialReport);
     }
 
     @Then("the system should generate a financial report")
@@ -67,8 +66,14 @@ public class BillingSystemTest {
 
     @Then("the report should include total revenue and transaction details")
     public void reportContainsRevenueAndDetails() {
-        String expectedReport = "Total Revenue: 0.0";
+        String expectedReport =
+                "Financial Report:\n" +
+                        "Transaction Details:\n" +
+                        "- Chicken: 25.0 ₪\n" +
+                        "- Pasta: 15.0 ₪\n" +
+                        "- Salad: 10.0 ₪\n\n" +
+                        "Total Revenue: 50.0 ₪\n";
+
         assertEquals("Financial report should match expected format", expectedReport, financialReport);
-        System.out.println("Financial report generated: " + financialReport);
     }
 }
